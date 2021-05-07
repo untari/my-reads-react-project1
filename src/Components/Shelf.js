@@ -1,16 +1,45 @@
 import React, { Component } from 'react';
-import Books from "./Books";
+import * as BooksAPI from "./BooksAPI";
 import { Link } from 'react-router-dom';
 import './App.css';
 
 class Shelf extends Component {
+    state = {
+        listBooks:[]
+    }
+    componentDidMount(){
+        BooksAPI.getAll()
+        .then(books => {
+            this.setState({ listBooks: books})
+        })
+    }
+    onShelfUpdate = (book, bookShelf) => {
+        const { listBooks } = this.state
+        const updateIndex = listBooks.findIndex(b => b.id === book.id)
+        const updateBook = listBooks[updateIndex]
+        updateBook.shelf = bookShelf
+        
+        this.setState({
+            listBooks: [...listBooks.slice(0, updateIndex), updateBooks, ...allBooks.slice(updateIndex + 1)]
+        })
+        BooksAPI.update(book, bookShelf)
+    }
     render() {
-        const { state, update } = this.props;
-        let booksReading = state.books.filter(book => book.shelf === 'curentlyReading');
-        let bookWantToRead = state.books.filter(
-            book => book.shelf === 'wantToRead'
-        );
-        let booksRead = state.books.filter(book => book.shelf === 'read');
+        const { listBooks } = this.state
+        const shelfBooks = [
+            {
+                name: 'Read',
+                books: listBooks.filter(book => book.shelf === 'read')
+            },
+            {
+                name: 'Currently Reading',
+                books: listBooks.filter(book => book.shelf === 'currentlyReading')
+            },
+            {
+                name: 'Wanr To Read',
+                books: listBooks.filter(book => book.shelf === 'wantToRead')
+            }
+        ]
         return(
             <div className="list-books">
                 <div className="list-books-title">
@@ -18,24 +47,14 @@ class Shelf extends Component {
                 </div>
                 <div className="list-books-content">
                 <div>
-                    {booksReading.length > 0 && (
-                        <div className="bookshelf">
-                        <h2 className="bookshelf-title">Currently Reading</h2>
-                        <div className="bookshelf-books">
-                            <Books books={booksReading} update={update} />
-                        </div>
-                      </div>
-                    )}
-                </div>
-                <div>
-                    {booksWantToRead.length > 0 &&(
-                        <div className="bookshelf">
-                            <h2 className="bookshelf-title">Want to Read</h2>
-                            <div className="bookshelf-books">
-                            <Books books={booksWantToRead}            update={update} />
-                        </div>
-                     </div>
-                    )}
+                    {shelfBooks && shelfBooks.map((shelf, index) => (
+                        <ShelfBooks 
+                            key={index}
+                            title={shelf.name}
+                            books={shelf.books}
+                            onShelfUpdate={this.onShelfUpdate}
+                        />
+                    ))}
                 </div>
              </div>
             </div>
