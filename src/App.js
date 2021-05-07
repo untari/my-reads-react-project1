@@ -2,6 +2,7 @@ import React from 'react'
 import { Route } from 'react-router-dom';
 import BookShelf from './BookShelf';
 import SearchPage from './SearchPage';
+import * as BooksAPI from "./BooksAPI";
 import './App.css'
 
 class BooksApp extends React.Component {
@@ -32,14 +33,29 @@ class BooksApp extends React.Component {
             this.setState(() => ({ query: ''}));
         }
     };
-
+    updateShelf = (book, shelf) => {
+        BooksAPI.update(book, shelf)
+        .then(() => {
+            this.setState(prevState.books.filter(b => {
+                if (b.id === book.id) {
+                    return(book.shelf = shelf);
+                } else {
+                    return book;
+                }
+            }));
+        });
+    };
   render() {
     return (
       <div className="app">
-        <Route exact path='/' component={BookShelf} />
-        <Route exact path='/search' component={SearchPage} />
+        <Route exact path='/' render={() => ( 
+            <BookShelf state={this.state} update={this.updateShelf} />)}
+        />
+        <Route exact path='/search' render={() => (
+            <SearchPage state={this.state} update={this.updateShelf} search={this.searchBooks} />
+        )} />
       </div>
-    )
+    );
   }
 }
 
