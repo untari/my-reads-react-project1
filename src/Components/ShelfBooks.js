@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import Books from './Book';
 
 class ShelfBooks extendes Component {
     render(){
+        const {title, books, onShelfUpdate = this.props}
         return(
             <div className='bookshelf'>
                 <div className='bookshelf-title'>
